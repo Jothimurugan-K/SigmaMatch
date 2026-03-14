@@ -1,0 +1,14 @@
+title: Suspicious PowerShell Encoded Command
+id: 11111111-2222-3333-4444-555555555555
+status: test
+description: Detects execution of PowerShell with encoded command arguments
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - "powershell"
+      - "-enc"
+  condition: selection
+level: medium

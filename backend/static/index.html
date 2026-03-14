@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
+<title>SigmaMatch</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--bg:#0a0e1a;--surface:#111827;--border:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--accent:#6366f1;--accent-hover:#818cf8;--green:#22c55e;--red:#ef4444;--green-bg:rgba(34,197,94,.12);--red-bg:rgba(239,68,68,.1);--yellow-bg:rgba(234,179,8,.1)}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+header{display:flex;align-items:center;padding:.75rem 1.5rem;border-bottom:1px solid var(--border)}
+header h1{font-size:1.25rem;font-weight:700}
+header h1 span{color:var(--accent)}
+.header-left{display:flex;flex-direction:column;gap:.1rem}
+.tagline{font-size:.75rem;color:var(--muted);font-weight:400}
+.header-center{flex:1;text-align:center}
+.header-center .hero-title{font-size:.85rem;font-weight:600;color:#c7d2fe;margin:0;line-height:1.4}
+.header-center .hero-sub{font-size:.75rem;color:var(--muted);margin:0;line-height:1.4}
+.btn-group{display:flex;gap:.4rem;align-items:center}
+button{padding:.3rem .7rem;border:none;border-radius:.3rem;font-size:.75rem;cursor:pointer;transition:background .15s}
+.btn-secondary{background:#374151;color:var(--text)}
+.btn-secondary:hover{background:#4b5563}
+.btn-primary{background:var(--accent);color:#fff;font-weight:600}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-danger{background:#991b1b;color:#fca5a5;font-size:.7rem;padding:.25rem .55rem}
+.btn-danger:hover{background:#b91c1c}
+button:disabled{opacity:.5;cursor:not-allowed}
+.upload-row{display:flex;gap:1.5rem;padding:.75rem 1.25rem;align-items:flex-start}
+.upload-col{flex:1;display:flex;flex-direction:column;gap:.35rem}
+@media(max-width:900px){.upload-row{flex-direction:column;gap:.75rem}}
+.main{display:grid;grid-template-columns:1fr 1fr;min-height:calc(100vh - 65px)}
+@media(max-width:900px){.main{grid-template-columns:1fr}}
+.pane{padding:1.25rem;display:flex;flex-direction:column;gap:.75rem}
+.pane:first-child{border-right:1px solid var(--border)}
+label{font-size:.8rem;font-weight:500;color:var(--muted)}
+select,textarea{width:100%;border-radius:.375rem;background:var(--surface);border:1px solid var(--border);color:var(--text);font-size:.85rem;padding:.5rem .75rem;outline:none}
+select:focus,textarea:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(99,102,241,.25)}
+textarea{font-family:'Consolas','Courier New',monospace;resize:vertical}
+.rule-area{flex:1;min-height:280px}
+.log-area{min-height:180px}
+input[type="file"]{font-size:.85rem;color:var(--muted)}
+input[type="file"]::file-selector-button{padding:.4rem .75rem;border:none;border-radius:.375rem;background:var(--accent);color:#fff;font-size:.8rem;cursor:pointer;margin-right:.75rem}
+.error-box{background:var(--red-bg);border:1px solid rgba(239,68,68,.3);color:#fca5a5;border-radius:.375rem;padding:.5rem .75rem;font-size:.85rem}
+.result-section{border-top:1px solid var(--border);padding-top:1rem}
+.result-section h3{font-size:.8rem;font-weight:600;color:var(--muted);margin-bottom:.75rem}
+.banner{padding:.75rem 1rem;border-radius:.375rem;margin-bottom:.75rem}
+.banner.matched{background:var(--green-bg);border:1px solid rgba(34,197,94,.3);color:#86efac}
+.banner.not-matched{background:var(--surface);border:1px solid var(--border);color:var(--muted)}
+.banner .title{font-size:1.1rem;font-weight:700}
+.banner .sub{font-size:.8rem;margin-top:.25rem;color:var(--muted)}
+.validation-box{padding:.75rem 1rem;border-radius:.375rem;font-size:.85rem}
+.validation-box.valid{background:var(--green-bg);border:1px solid rgba(34,197,94,.3);color:#86efac}
+.validation-box.invalid{background:var(--yellow-bg);border:1px solid rgba(234,179,8,.3);color:#fde68a}
+.validation-box p{margin:.15rem 0}
+.validation-box ul{margin-top:.4rem;padding-left:1.25rem}
+.validation-box li{margin:.15rem 0}
+.sev-error{color:#fca5a5;font-weight:600}
+.sev-warning{color:#fde68a;font-weight:600}
+.sev-info{color:#93c5fd;font-weight:600}
+.warning-box{background:rgba(251,191,36,.1);border:1px solid rgba(251,191,36,.3);border-radius:.5rem;padding:.6rem 1rem;margin:.5rem 0;color:#fde68a;font-size:.85rem}
+table{width:100%;border-collapse:collapse;font-size:.8rem}
+th{text-align:left;padding:.5rem .6rem;border-bottom:1px solid var(--border);color:var(--muted);font-weight:500}
+td{padding:.5rem .6rem;border-bottom:1px solid rgba(31,41,55,.5);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,.02)}
+.tag{display:inline-block;background:rgba(99,102,241,.2);color:#a5b4fc;font-size:.75rem;padding:.15rem .45rem;border-radius:.25rem;margin-right:.25rem}
+.empty-state{text-align:center;padding:3rem 1rem;color:var(--muted)}
+.empty-state p:first-child{font-size:1.1rem}
+.empty-state p:last-child{font-size:.85rem;margin-top:.3rem}
+.privacy-banner{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(99,102,241,.08));border:1px solid rgba(99,102,241,.25);border-radius:.5rem;margin:.75rem 1.25rem;padding:.5rem 1rem;display:flex;flex-direction:column;gap:.15rem;font-size:.8rem}
+.privacy-line{display:flex;align-items:center;flex-wrap:wrap;gap:.35rem;color:var(--muted);line-height:1.5}
+.privacy-line .warn{font-weight:700;color:#93c5fd}
+.privacy-line strong{color:#fbbf24}
+.privacy-line .lock{color:var(--muted)}
+.btn-try-test{background:linear-gradient(135deg,#6366f1,#818cf8);color:#fff;font-weight:600;font-size:.75rem;padding:.3rem .85rem;border-radius:.3rem;border:none;cursor:pointer;white-space:nowrap;flex-shrink:0;align-self:center;transition:opacity .15s}
+.btn-try-test:hover{opacity:.88}
+.privacy-title-docker{font-size:.8rem;font-weight:700;color:#86efac;cursor:pointer}
+.privacy-title-docker:hover{color:#bbf7d0}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center;padding:1rem}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:.75rem;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:1.75rem;position:relative}
+.modal-close{position:absolute;top:.75rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:.25rem}
+.modal-close:hover{color:var(--text)}
+.modal h2{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.25rem}
+.modal .modal-subtitle{font-size:.8rem;color:var(--muted);margin-bottom:1rem}
+.modal h3{font-size:.85rem;font-weight:600;color:#c7d2fe;margin-top:1rem;margin-bottom:.4rem}
+.modal p,.modal li{font-size:.82rem;color:var(--muted);line-height:1.6}
+.modal ul{padding-left:1.25rem;margin:.25rem 0}
+.modal li{margin:.2rem 0}
+.modal a{color:var(--accent-hover);text-decoration:underline}
+.code-block{position:relative;background:#1a1a2e;border:1px solid var(--border);border-radius:.375rem;padding:.6rem .75rem;padding-right:3rem;font-family:'Consolas','Courier New',monospace;font-size:.8rem;color:#a5b4fc;margin:.4rem 0;overflow-x:auto;white-space:pre}
+.btn-copy{position:absolute;top:.4rem;right:.4rem;background:#374151;color:var(--muted);border:none;border-radius:.25rem;font-size:.7rem;padding:.25rem .5rem;cursor:pointer}
+.btn-copy:hover{background:#4b5563;color:var(--text)}
+.btn-copy.copied{background:#166534;color:#86efac}
+.modal .env-table{width:100%;border-collapse:collapse;font-size:.78rem;margin:.5rem 0}
+.modal .env-table th{text-align:left;padding:.4rem .5rem;border-bottom:1px solid var(--border);color:var(--muted);font-weight:500}
+.modal .env-table td{padding:.4rem .5rem;border-bottom:1px solid rgba(31,41,55,.5);color:var(--text)}
+.modal .env-table td:first-child{font-family:'Consolas',monospace;color:#a5b4fc}
+.export-bar{display:flex;gap:.5rem;margin-top:.75rem}
+.btn-export{background:#1e293b;color:#94a3b8;border:1px solid var(--border);font-size:.75rem;padding:.35rem .7rem;border-radius:.375rem;cursor:pointer;transition:background .15s}
+.btn-export:hover{background:#334155;color:var(--text)}
+.batch-rule{border:1px solid var(--border);border-radius:.375rem;margin-bottom:.5rem;overflow:hidden}
+.batch-rule-header{display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;cursor:pointer;font-size:.85rem;transition:background .15s}
+.batch-rule-header:hover{background:rgba(255,255,255,.03)}
+.batch-rule-header.matched-hdr{background:var(--green-bg);border-left:3px solid var(--green)}
+.batch-rule-header.not-matched-hdr{background:var(--surface);border-left:3px solid var(--border)}
+.batch-rule-header.error-hdr{background:var(--red-bg);border-left:3px solid var(--red)}
+.batch-rule-body{padding:.5rem .75rem;border-top:1px solid var(--border);display:none}
+.batch-rule-body.open{display:block}
+.batch-rule-title{font-weight:600}
+.batch-rule-meta{font-size:.75rem;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <h1><svg width="28" height="28" viewBox="0 0 32 32" style="vertical-align:-5px;margin-right:6px"><rect width="32" height="32" rx="6" fill="#6366f1"/><text x="16" y="24" text-anchor="middle" font-family="Georgia,serif" font-size="24" font-weight="bold" fill="#fff">&#931;</text></svg>SigmaMatch</h1>
+    <span class="tagline">Instant Sigma Rule Testing for Logs.</span>
+  </div>
+  <div class="header-center">
+    <p class="hero-title">Validate Sigma rules and check matches against your logs &mdash; hassle&#8209;free</p>
+    <p class="hero-sub">Upload rules &bull; Upload logs &bull; Get matches &mdash; instantly.</p>
+  </div>
+</header>
+
+<div class="privacy-banner">
+  <div class="privacy-line"><span class="warn">⚠️ Use Test Data Only &mdash; Do NOT Upload Production Logs.</span> Use <strong>synthetic or dummy data</strong>. <span class="lock">🔒 All processing is in-memory &mdash; nothing is stored.</span></div>
+  <div class="privacy-line"><span class="privacy-title-docker" id="btnSelfHost">📦 Self-Host via Docker for internal use &mdash; Click Here for Setup Steps</span></div>
+</div>
+
+<!-- Self-Host Docker Modal -->
+<div class="modal-overlay" id="dockerModal">
+  <div class="modal">
+    <button class="modal-close" id="modalClose">&times;</button>
+    <h2>🐳 Self-Host SigmaMatch with Docker</h2>
+    <p class="modal-subtitle">Run this tool entirely inside your own network. Logs never leave your infrastructure.</p>
+
+    <h3>Prerequisites</h3>
+    <ul>
+      <li><a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener">Docker</a> installed</li>
+      <li><a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git</a> installed</li>
+    </ul>
+
+    <h3>Step 1 &mdash; Clone the Repository</h3>
+    <div class="code-block" id="codeClone">git clone https://github.com/jkrishna-ec/SigmaMatch.git
+cd SigmaMatch<button class="btn-copy" data-target="codeClone">Copy</button></div>
+
+    <h3>Step 2 &mdash; Build &amp; Run</h3>
+    <div class="code-block" id="codeBuild">docker-compose up -d --build<button class="btn-copy" data-target="codeBuild">Copy</button></div>
+    <p>This builds the image, installs dependencies, and starts the server on port <strong style="color:var(--text)">8000</strong>.</p>
+
+    <h3>Step 3 &mdash; Open the Tool</h3>
+    <div class="code-block" id="codeOpen">http://localhost:8000<button class="btn-copy" data-target="codeOpen">Copy</button></div>
+    <p>That&rsquo;s it &mdash; the tool is running <strong style="color:#86efac">entirely on your machine</strong>. Now you can safely use real logs.</p>
+
+    <h3>Useful Commands</h3>
+    <table class="env-table">
+      <thead><tr><th>Action</th><th>Command</th></tr></thead>
+      <tbody>
+        <tr><td>View logs</td><td><code>docker-compose logs -f</code></td></tr>
+        <tr><td>Stop</td><td><code>docker-compose down</code></td></tr>
+        <tr><td>Restart</td><td><code>docker-compose restart</code></td></tr>
+      </tbody>
+    </table>
+
+    <h3>Optional Configuration</h3>
+    <p>Add these under <code>environment:</code> in <code>docker-compose.yml</code>:</p>
+    <table class="env-table">
+      <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+      <tbody>
+        <tr><td>ALLOWED_ORIGINS</td><td><em>same-origin</em></td><td>CORS allowed origins (comma-separated)</td></tr>
+        <tr><td>MATCH_TIMEOUT</td><td>30</td><td>Max seconds per match operation</td></tr>
+      </tbody>
+    </table>
+
+    <h3>Change Port</h3>
+    <p>If port 8000 is taken, edit <code>docker-compose.yml</code> and change <code>"8000:8000"</code> to e.g. <code>"9090:8000"</code>, then access at <code>http://localhost:9090</code>.</p>
+  </div>
+</div>
+
+<div class="upload-row" style="align-items:center">
+  <div style="display:flex;align-items:center;gap:.5rem;flex:1;min-width:0">
+    <label for="sampleSelect" style="margin:0;white-space:nowrap;font-size:.8rem">Load a sample rule &amp; log</label>
+    <select id="sampleSelect" style="max-width:250px;min-width:250px">
+      <option value="" disabled selected>&mdash; select a sample &mdash;</option>
+    </select>
+  </div>
+  <div class="btn-group">
+    <button class="btn-try-test" id="btnTryTest" title="Load sample test data instantly">🧪 Try with Test Data</button>
+    <button class="btn-secondary" id="btnValidate">Validate Rule</button>
+    <button class="btn-primary" id="btnCheck">Check Match</button>
+    <button class="btn-danger" id="btnClearAllInline" type="button">Clear All</button>
+  </div>
+</div>
+
+<div class="upload-row">
+  <div class="upload-col">
+    <label>Upload rule file(s) (.yml / .yaml, &le; 5 MB)</label>
+    <input type="file" id="ruleFileInput" accept=".yml,.yaml" multiple/>
+    <div id="ruleFileError" class="error-box" style="display:none"></div>
+  </div>
+  <div class="upload-col">
+    <label>Upload log file (.json / .ndjson / .xml / .csv / .tsv / .log, &le; 5 MB)</label>
+    <input type="file" id="fileInput" accept=".json,.ndjson,.jsonl,.xml,.csv,.tsv,.log,.txt"/>
+    <div id="fileError" class="error-box" style="display:none"></div>
+  </div>
+</div>
+
+<div class="main">
+  <!-- Left pane: Rule editor -->
+  <div class="pane">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <label for="ruleArea">Paste Sigma Rule (YAML)</label>
+      <button class="btn-danger" id="btnClearRule">Clear Rule</button>
+    </div>
+    <textarea id="ruleArea" class="rule-area" spellcheck="false" placeholder="Paste your Sigma rule YAML here...
+For multiple rules, separate with ---"></textarea>
+  </div>
+
+  <!-- Right pane: Logs + Results -->
+  <div class="pane">
+    <div style="display:flex;align-items:center;justify-content:space-between">
+      <label for="logArea">Paste log data (JSON / NDJSON / XML / CSV / KV)</label>
+      <button class="btn-danger" id="btnClearLogs">Clear Logs</button>
+    </div>
+    <textarea id="logArea" class="log-area" spellcheck="false" placeholder='{"EventID":1,"CommandLine":"powershell -enc ..."}'></textarea>
+
+    <div class="result-section">
+      <h3>Results</h3>
+      <div id="results">
+        <div class="empty-state">
+          <p>No results yet</p>
+          <p>Paste or upload a Sigma rule and log, then click <strong>Check Match</strong>.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ---------- Sample data ----------
+const SAMPLES = [
+  {
+    label: "Windows \u2013 Suspicious PowerShell Encoded Command",
+    yaml: `title: Suspicious PowerShell Encoded Command
+id: 11111111-2222-3333-4444-555555555555
+status: test
+logsource:
+  product: windows
+  category: process_creation
+detection:
+  selection:
+    CommandLine|contains:
+      - "powershell"
+      - "-enc"
+  condition: selection
+level: medium`,
+    log: JSON.stringify({"EventID":1,"Image":"C:\\\\Windows\\\\System32\\\\WindowsPowerShell\\\\v1.0\\\\powershell.exe","CommandLine":"powershell -enc SQBtAGwAZQB0AHMALgBjAG8AbQBt"},null,2)
+  },
+  {
+    label: "Okta \u2013 User Locked Out",
+    yaml: `title: Okta User Locked Out
+id: 22222222-3333-4444-5555-666666666666
+status: test
+logsource:
+  product: okta
+  service: okta
+detection:
+  selection:
+    eventType|equals:
+      - "user.account.lock"
+  condition: selection
+level: high`,
+    log: JSON.stringify({"eventType":"user.account.lock","actor":{"displayName":"john.doe@example.com"},"outcome":{"result":"SUCCESS"}},null,2)
+  },
+  {
+    label: "Linux \u2013 SSH Failed Login",
+    yaml: `title: SSH Failed Login Attempt
+id: 33333333-4444-5555-6666-777777777777
+status: test
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    message|startswith: "Failed password"
+  condition: selection
+level: low`,
+    log: `{"message":"Failed password for root from 10.0.0.1 port 22 ssh2","hostname":"web-01"}
+{"message":"Accepted password for admin from 10.0.0.2 port 22 ssh2","hostname":"web-01"}
+{"message":"Failed password for ubuntu from 10.0.0.3 port 22 ssh2","hostname":"web-02"}`
+  }
+];
+
+// ---------- State ----------
+let lastMatchResult = null;
+
+// ---------- DOM refs ----------
+const sampleSelect = document.getElementById("sampleSelect");
+const ruleArea = document.getElementById("ruleArea");
+const logArea = document.getElementById("logArea");
+const fileInput = document.getElementById("fileInput");
+const fileError = document.getElementById("fileError");
+const resultsDiv = document.getElementById("results");
+const btnValidate = document.getElementById("btnValidate");
+const btnCheck = document.getElementById("btnCheck");
+const ruleFileInput = document.getElementById("ruleFileInput");
+const ruleFileError = document.getElementById("ruleFileError");
+const btnClearRule = document.getElementById("btnClearRule");
+const btnClearLogs = document.getElementById("btnClearLogs");
+
+// ---------- Populate samples ----------
+SAMPLES.forEach((s, i) => {
+  const opt = document.createElement("option");
+  opt.value = i;
+  opt.textContent = s.label;
+  sampleSelect.appendChild(opt);
+});
+
+btnClearRule.addEventListener("click", () => { ruleArea.value = ""; sampleSelect.value = ""; ruleFileInput.value = ""; ruleFileError.style.display = "none"; clearResults(); });
+btnClearLogs.addEventListener("click", () => { logArea.value = ""; fileInput.value = ""; fileError.style.display = "none"; clearResults(); });
+document.getElementById("btnClearAllInline").addEventListener("click", () => { ruleArea.value = ""; sampleSelect.value = ""; ruleFileInput.value = ""; ruleFileError.style.display = "none"; logArea.value = ""; fileInput.value = ""; fileError.style.display = "none"; clearResults(); });
+
+sampleSelect.addEventListener("change", () => {
+  const s = SAMPLES[sampleSelect.value];
+  if (s) { ruleArea.value = s.yaml; logArea.value = s.log; clearResults(); }
+});
+
+// ---------- Self-Host Docker Modal ----------
+const dockerModal = document.getElementById("dockerModal");
+document.getElementById("btnSelfHost").addEventListener("click", () => { dockerModal.classList.add("open"); });
+document.getElementById("modalClose").addEventListener("click", () => { dockerModal.classList.remove("open"); });
+dockerModal.addEventListener("click", (e) => { if (e.target === dockerModal) dockerModal.classList.remove("open"); });
+document.addEventListener("keydown", (e) => { if (e.key === "Escape") dockerModal.classList.remove("open"); });
+
+// ---------- Copy buttons in modal ----------
+dockerModal.querySelectorAll(".btn-copy").forEach(btn => {
+  btn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const block = document.getElementById(btn.dataset.target);
+    const text = block.textContent.replace(/Copy(ed!)?$/, "").trim();
+    navigator.clipboard.writeText(text).then(() => {
+      btn.textContent = "Copied!";
+      btn.classList.add("copied");
+      setTimeout(() => { btn.textContent = "Copy"; btn.classList.remove("copied"); }, 1500);
+    });
+  });
+});
+
+// ---------- Try with Test Data button ----------
+document.getElementById("btnTryTest").addEventListener("click", () => {
+  const s = SAMPLES[0]; // Load first sample (Windows PowerShell)
+  if (s) {
+    ruleArea.value = s.yaml;
+    logArea.value = s.log;
+    sampleSelect.value = "0";
+    clearResults();
+    ruleArea.scrollIntoView({behavior: "smooth", block: "start"});
+  }
+});
+
+// ---------- Rule file upload ----------
+ruleFileInput.addEventListener("change", () => {
+  ruleFileError.style.display = "none";
+  const files = Array.from(ruleFileInput.files);
+  if (!files.length) return;
+  let totalSize = 0;
+  for (const f of files) { totalSize += f.size; }
+  if (totalSize > 5*1024*1024) { showRuleFileError("Total files too large (" + (totalSize/1024/1024).toFixed(1) + " MB). Max 5 MB."); return; }
+  for (const f of files) {
+    const ext = f.name.split(".").pop().toLowerCase();
+    if (!["yml","yaml"].includes(ext)) { showRuleFileError("Unsupported file type: " + f.name + ". Use .yml or .yaml."); return; }
+  }
+  const readPromises = files.map(f => new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(new Error("Failed to read " + f.name));
+    reader.readAsText(f);
+  }));
+  Promise.all(readPromises).then(contents => {
+    ruleArea.value = contents.join("\n---\n");
+    sampleSelect.value = "";
+  }).catch(e => showRuleFileError(e.message));
+});
+
+function showRuleFileError(msg) { ruleFileError.textContent = msg; ruleFileError.style.display = "block"; }
+
+// ---------- Log file upload ----------
+fileInput.addEventListener("change", () => {
+  fileError.style.display = "none";
+  const f = fileInput.files[0];
+  if (!f) return;
+  if (f.size > 5*1024*1024) { showFileError("File too large (" + (f.size/1024/1024).toFixed(1) + " MB). Max 5 MB."); return; }
+  const ext = f.name.split(".").pop().toLowerCase();
+  if (!["json","ndjson","jsonl","xml","csv","tsv","log","txt"].includes(ext)) { showFileError("Unsupported file type. Use .json, .ndjson, .xml, .csv, .tsv, or .log."); return; }
+  const reader = new FileReader();
+  reader.onload = () => { logArea.value = reader.result; };
+  reader.onerror = () => showFileError("Failed to read file.");
+  reader.readAsText(f);
+});
+
+function showFileError(msg) { fileError.textContent = msg; fileError.style.display = "block"; }
+
+// ---------- API calls ----------
+async function apiPost(path, body) {
+  const res = await fetch("/api/" + path, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify(body)
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw new Error(data?.detail || "Request failed (" + res.status + ")");
+  return data;
+}
+
+btnValidate.addEventListener("click", async () => {
+  clearResults();
+  if (!ruleArea.value.trim()) { showError("Please enter a Sigma rule."); return; }
+  btnValidate.disabled = true;
+  try {
+    if (isBatchInput(ruleArea.value)) {
+      const r = await apiPost("batch-validate", {rule_yaml: ruleArea.value});
+      renderBatchValidation(r);
+    } else {
+      const r = await apiPost("validate", {rule_yaml: ruleArea.value});
+      renderValidation(r);
+    }
+  } catch (e) { showError(e.message); }
+  finally { btnValidate.disabled = false; }
+});
+
+function isBatchInput(text) {
+  return /^---\s*$/m.test(text) || /\n---\s*\n/.test(text);
+}
+
+btnCheck.addEventListener("click", async () => {
+  clearResults();
+  if (!ruleArea.value.trim()) { showError("Please enter a Sigma rule."); return; }
+  if (!logArea.value.trim()) { showError("Please provide log data (upload or paste)."); return; }
+  btnCheck.disabled = true;
+  btnCheck.textContent = "Checking\u2026";
+  try {
+    const body = {rule_yaml: ruleArea.value, logs_text: logArea.value};
+    if (isBatchInput(ruleArea.value)) {
+      const r = await apiPost("batch-check", body);
+      renderBatchMatch(r);
+    } else {
+      const r = await apiPost("check", body);
+      renderMatch(r);
+    }
+  } catch (e) { showError(e.message); }
+  finally { btnCheck.disabled = false; btnCheck.textContent = "Check Match"; }
+});
+
+// ---------- Rendering ----------
+function clearResults() {
+  lastMatchResult = null;
+  resultsDiv.innerHTML = `<div class="empty-state"><p>No results yet</p><p>Paste or upload a Sigma rule and log, then click <strong>Check Match</strong>.</p></div>`;
+}
+
+function showError(msg) {
+  resultsDiv.innerHTML = `<div class="error-box">${esc(msg)}</div>`;
+}
+
+function renderValidation(v) {
+  const cls = v.valid ? "valid" : "invalid";
+  let html = `<div class="validation-box ${cls}">`;
+  html += `<p><strong>Validation: ${v.valid ? "\u2713 Valid" : "\u2717 Issues found"}</strong></p>`;
+  if (v.title) html += `<p style="font-size:.8rem;color:#9ca3af">Title: ${esc(v.title)}</p>`;
+  if (v.logsource) {
+    const parts = [v.logsource.product, v.logsource.category, v.logsource.service].filter(Boolean).join(" / ");
+    if (parts) html += `<p style="font-size:.8rem;color:#9ca3af">Logsource: ${esc(parts)}</p>`;
+  }
+  if (v.issues.length) {
+    html += "<ul>";
+    v.issues.forEach(i => {
+      html += `<li><span class="sev-${i.severity}">[${i.severity}]</span> ${esc(i.message)}</li>`;
+    });
+    html += "</ul>";
+  }
+  html += "</div>";
+  resultsDiv.innerHTML = html;
+}
+
+function renderBatchValidation(r) {
+  let html = "";
+  const allValid = r.valid_count === r.total_rules;
+  const cls = allValid ? "valid" : "invalid";
+  html += `<div class="validation-box ${cls}">`;
+  html += `<p><strong>${allValid ? "\u2713" : "\u2717"} ${r.valid_count} of ${r.total_rules} rules valid</strong></p>`;
+  html += `</div>`;
+
+  r.results.forEach((rr, idx) => {
+    const v = rr.result;
+    const icon = v.valid ? "\u2713" : "\u2717";
+    const hdrCls = v.valid ? "matched-hdr" : "error-hdr";
+    const title = rr.rule_title || "Rule " + (idx + 1);
+    html += `<div class="batch-rule">`;
+    html += `<div class="batch-rule-header ${hdrCls}" data-batch-idx="v${idx}">`;
+    html += `<span class="batch-rule-title">${icon} ${esc(title)}</span>`;
+    html += `<span class="batch-rule-meta">${v.valid ? "Valid" : v.issues.length + " issue(s)"}</span>`;
+    html += `</div>`;
+    html += `<div class="batch-rule-body" id="batch-body-v${idx}">`;
+    if (v.logsource) {
+      const parts = [v.logsource.product, v.logsource.category, v.logsource.service].filter(Boolean).join(" / ");
+      if (parts) html += `<p style="font-size:.8rem;color:#9ca3af">Logsource: ${esc(parts)}</p>`;
+    }
+    if (v.issues.length) {
+      html += "<ul>";
+      v.issues.forEach(i => {
+        html += `<li><span class="sev-${i.severity}">[${i.severity}]</span> ${esc(i.message)}</li>`;
+      });
+      html += "</ul>";
+    } else {
+      html += `<p style="color:#22c55e;font-size:.85rem">No issues found.</p>`;
+    }
+    html += `</div></div>`;
+  });
+
+  resultsDiv.innerHTML = html;
+
+  resultsDiv.querySelectorAll(".batch-rule-header").forEach(hdr => {
+    hdr.addEventListener("click", () => {
+      const body = document.getElementById("batch-body-" + hdr.dataset.batchIdx);
+      body.classList.toggle("open");
+    });
+  });
+}
+
+function renderMatch(r) {
+  lastMatchResult = r;
+  let html = "";
+  const cls = r.matched ? "matched" : "not-matched";
+  html += `<div class="banner ${cls}">`;
+  html += `<div class="title">${r.matched ? "\u2705 Matched" : "\u274c Not Matched"}</div>`;
+  html += `<div style="font-size:.85rem;margin-top:.25rem">${esc(r.explanation)}</div>`;
+  html += `<div class="sub">${r.match_count} of ${r.total_events} events matched</div>`;
+  html += "</div>";
+
+  if (r.warnings && r.warnings.length) {
+    r.warnings.forEach(w => { html += `<div class="warning-box">\u26a0\ufe0f ${esc(w)}</div>`; });
+  }
+
+  if (r.matches.length) {
+    html += `<table><thead><tr><th>#</th><th>Event</th><th>Selections</th><th>Explanation</th></tr></thead><tbody>`;
+    r.matches.forEach((m, i) => {
+      const tags = m.matched_selections.map(s => `<span class="tag">${esc(s)}</span>`).join("");
+      html += `<tr><td>${i+1}</td><td style="font-family:monospace">${m.event_index}</td><td>${tags}</td><td style="color:#d1d5db">${esc(m.explanation)}</td></tr>`;
+    });
+    html += "</tbody></table>";
+  }
+
+  html += `<div class="export-bar"><button class="btn-export" id="btnExportJson">Export JSON</button><button class="btn-export" id="btnExportCsv">Export CSV</button></div>`;
+  resultsDiv.innerHTML = html;
+
+  document.getElementById("btnExportJson").addEventListener("click", exportJson);
+  document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+}
+
+function renderBatchMatch(r) {
+  lastMatchResult = r;
+  let html = "";
+  const anyMatched = r.rules_matched > 0;
+  const cls = anyMatched ? "matched" : "not-matched";
+  html += `<div class="banner ${cls}">`;
+  html += `<div class="title">${anyMatched ? "\u2705" : "\u274c"} ${r.rules_matched} of ${r.total_rules} rules matched</div>`;
+  html += `<div style="font-size:.85rem;margin-top:.25rem">${esc(r.explanation)}</div>`;
+  html += `</div>`;
+
+  r.results.forEach((rr, idx) => {
+    const res = rr.result;
+    const hdrCls = rr.error ? "error-hdr" : (res.matched ? "matched-hdr" : "not-matched-hdr");
+    const icon = rr.error ? "\u26a0\ufe0f" : (res.matched ? "\u2705" : "\u274c");
+    const title = rr.rule_title || "Rule " + (idx + 1);
+    html += `<div class="batch-rule">`;
+    html += `<div class="batch-rule-header ${hdrCls}" data-batch-idx="${idx}">`;
+    html += `<span><span class="batch-rule-title">${icon} ${esc(title)}</span></span>`;
+    html += `<span class="batch-rule-meta">${res.match_count}/${res.total_events} events</span>`;
+    html += `</div>`;
+    html += `<div class="batch-rule-body" id="batch-body-${idx}">`;
+    if (res.warnings && res.warnings.length) {
+      res.warnings.forEach(w => { html += `<div class="warning-box">\u26a0\ufe0f ${esc(w)}</div>`; });
+    }
+    if (rr.error) {
+      html += `<div class="error-box">${esc(rr.error)}</div>`;
+    } else if (res.matches.length) {
+      html += `<table><thead><tr><th>#</th><th>Event</th><th>Selections</th><th>Explanation</th></tr></thead><tbody>`;
+      res.matches.forEach((m, i) => {
+        const tags = m.matched_selections.map(s => `<span class="tag">${esc(s)}</span>`).join("");
+        html += `<tr><td>${i+1}</td><td style="font-family:monospace">${m.event_index}</td><td>${tags}</td><td style="color:#d1d5db">${esc(m.explanation)}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+    } else {
+      html += `<p style="color:var(--muted);font-size:.85rem">No matching events.</p>`;
+    }
+    html += `</div></div>`;
+  });
+
+  html += `<div class="export-bar"><button class="btn-export" id="btnExportJson">Export JSON</button><button class="btn-export" id="btnExportCsv">Export CSV</button></div>`;
+  resultsDiv.innerHTML = html;
+
+  // Toggle collapsible bodies
+  resultsDiv.querySelectorAll(".batch-rule-header").forEach(hdr => {
+    hdr.addEventListener("click", () => {
+      const body = document.getElementById("batch-body-" + hdr.dataset.batchIdx);
+      body.classList.toggle("open");
+    });
+  });
+
+  document.getElementById("btnExportJson").addEventListener("click", exportJson);
+  document.getElementById("btnExportCsv").addEventListener("click", exportCsv);
+}
+
+function esc(s) { const d = document.createElement("div"); d.textContent = s; return d.innerHTML; }
+
+// ---------- Export ----------
+function downloadFile(filename, content, mimeType) {
+  const blob = new Blob([content], {type: mimeType});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function exportJson() {
+  if (!lastMatchResult) return;
+  downloadFile("sigma_match_results.json", JSON.stringify(lastMatchResult, null, 2), "application/json");
+}
+
+function exportCsv() {
+  if (!lastMatchResult) return;
+  const r = lastMatchResult;
+  // Batch result
+  if (r.results) {
+    const rows = [["Rule Title", "Rule ID", "Matched", "Match Count", "Total Events", "Event Index", "Matched Selections", "Matched Fields", "Explanation"]];
+    r.results.forEach(rr => {
+      const res = rr.result;
+      if (res.matches.length) {
+        res.matches.forEach(m => {
+          const fields = m.matched_fields.map(f => f.field + " " + f.modifier + " " + f.expected.join("|") + " (actual: " + f.actual + ")").join("; ");
+          rows.push([rr.rule_title, rr.rule_id, res.matched, res.match_count, res.total_events, m.event_index, m.matched_selections.join("; "), fields, m.explanation]);
+        });
+      } else {
+        rows.push([rr.rule_title, rr.rule_id, res.matched, 0, res.total_events, "", "", "", ""]);
+      }
+    });
+    const csvContent = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(",")).join("\n");
+    downloadFile("sigma_batch_results.csv", csvContent, "text/csv");
+    return;
+  }
+  // Single result
+  const rows = [["Event Index", "Matched Selections", "Matched Fields", "Explanation"]];
+  r.matches.forEach(m => {
+    const fields = m.matched_fields.map(f => f.field + " " + f.modifier + " " + f.expected.join("|") + " (actual: " + f.actual + ")").join("; ");
+    rows.push([m.event_index, m.matched_selections.join("; "), fields, m.explanation]);
+  });
+  const csvContent = rows.map(row => row.map(cell => '"' + String(cell).replace(/"/g, '""') + '"').join(",")).join("\n");
+  const header = "Matched: " + r.matched + ", Match Count: " + r.match_count + ", Total Events: " + r.total_events + "\n";
+  downloadFile("sigma_match_results.csv", header + csvContent, "text/csv");
+}
+</script>
+</body>
+</html>

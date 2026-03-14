@@ -1,0 +1,5 @@
+timestamp,hostname,severity,process,message
+2024-03-15T10:23:01Z,web-01,error,sshd,Failed password for root from 10.0.0.1 port 22 ssh2
+2024-03-15T10:23:05Z,web-01,info,sshd,Accepted password for admin from 10.0.0.2 port 22 ssh2
+2024-03-15T10:23:10Z,web-02,error,sshd,Failed password for ubuntu from 10.0.0.3 port 22 ssh2
+2024-03-15T10:23:15Z,db-01,warning,sudo,pam_unix(sudo:auth): authentication failure; logname= uid=1000 euid=0 tty=/dev/pts/0 ruser=deploy rhost=

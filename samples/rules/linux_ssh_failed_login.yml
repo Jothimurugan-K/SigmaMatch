@@ -1,0 +1,12 @@
+title: SSH Failed Login Attempt
+id: 33333333-4444-5555-6666-777777777777
+status: test
+description: Detects failed SSH password authentication attempts
+logsource:
+  product: linux
+  service: sshd
+detection:
+  selection:
+    message|startswith: "Failed password"
+  condition: selection
+level: low

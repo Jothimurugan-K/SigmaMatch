@@ -1,0 +1,3 @@
+type=USER_AUTH msg=audit(1710500581.123:456): pid=12345 uid=0 auid=1000 ses=3 msg='op=PAM:authentication grantors=pam_unix acct="root" exe="/usr/sbin/sshd" hostname=10.0.0.1 addr=10.0.0.1 terminal=ssh res=failed'
+type=USER_LOGIN msg=audit(1710500582.456:457): pid=12346 uid=0 auid=1000 ses=4 msg='op=login acct="admin" exe="/usr/sbin/sshd" hostname=10.0.0.2 addr=10.0.0.2 terminal=ssh res=success'
+type=USER_AUTH msg=audit(1710500583.789:458): pid=12347 uid=0 auid=1001 ses=5 msg='op=PAM:authentication grantors=pam_unix acct="deploy" exe="/usr/bin/sudo" hostname=? addr=? terminal=/dev/pts/0 res=failed'

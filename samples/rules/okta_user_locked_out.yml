@@ -1,0 +1,13 @@
+title: Okta User Locked Out
+id: 22222222-3333-4444-5555-666666666666
+status: test
+description: Detects when an Okta user account is locked out
+logsource:
+  product: okta
+  service: okta
+detection:
+  selection:
+    eventType|equals:
+      - "user.account.lock"
+  condition: selection
+level: high

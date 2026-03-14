@@ -1,0 +1,14 @@
+[
+  {
+    "eventType": "user.account.lock",
+    "actor": {"displayName": "john.doe@example.com", "alternateId": "john.doe@example.com"},
+    "outcome": {"result": "SUCCESS"},
+    "published": "2025-01-15T10:30:00.000Z"
+  },
+  {
+    "eventType": "user.session.start",
+    "actor": {"displayName": "jane.smith@example.com"},
+    "outcome": {"result": "SUCCESS"},
+    "published": "2025-01-15T10:31:00.000Z"
+  }
+]
