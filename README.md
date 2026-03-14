@@ -105,4 +105,3 @@ SigmaMatch/
 ## Tech Stack
 
 Python 3.11+ · FastAPI · Uvicorn · Pydantic v2 · PyYAML · defusedxml · slowapi + Redis · Docker
-- Multi-backend query preview via sigma-cli
