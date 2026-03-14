@@ -1,102 +1,114 @@
 # SigmaMatch
 
-A minimal web app to upload a Sigma rule (YAML) and a log file and check whether the rule matches any events.
+**Instant Sigma Rule Testing for Real-World Logs.**
 
-## Quick Start (no venv, no Node.js)
+SigmaMatch is a web-based tool that lets security analysts upload **Sigma detection rules** (YAML) and **log events** (JSON, NDJSON, XML, CSV, Key=Value), then instantly check whether the rules match any events. Get detailed results showing which selections triggered, which fields matched, and why.
 
-### 1. Install dependencies
+## Features
+
+- **9 field modifiers** — `equals`, `contains`, `startswith`, `endswith`, `re`, and their negations
+- **Full boolean conditions** — `and`, `or`, `not`, parentheses, `1 of selection_*`, `all of them`
+- **Multi-format log parsing** — JSON, NDJSON, Windows Event XML, CSV/TSV, Key=Value (auto-detected)
+- **Batch mode** — validate and match multiple `---` separated rules in one request
+- **Export results** — download matches as JSON or CSV
+- **Built-in samples** — 3 pre-loaded rules with matching logs for quick testing
+- **Safe by design** — `yaml.safe_load`, `defusedxml`, XSS-safe frontend, rate limiting, match timeout
+- **Redis-backed rate limiter** — correct limits across multiple workers/containers (falls back to in-memory for local dev)
+
+## Quick Start
+
+### Local (no Docker)
 
 ```bash
 cd backend
-pip install fastapi uvicorn pydantic pyyaml python-multipart
+pip install -e .
+uvicorn app.main:app --reload
 ```
 
-### 2. Run the server
+Open **http://localhost:8000**
 
-```bash
-cd backend
-uvicorn app.main:app --reload --port 8000
-```
-
-### 3. Open in browser
-
-Go to **http://localhost:8000**
-
-That's it! The UI is served directly by the Python backend — no Node.js needed.
-
----
-
-## Run with Docker
+### Docker
 
 ```bash
 docker-compose up --build
 ```
 
-Then open **http://localhost:8000**.
+Open **http://localhost:8000** — runs 4 Uvicorn workers + Redis for shared rate limiting.
 
----
-
-## Run tests
+### Run Tests
 
 ```bash
 cd backend
-pip install pytest
+pip install -e ".[dev]"
 pytest -v
 ```
 
----
-
-## Project Structure
-
-```
-SigmaRuleSite/
-  backend/
-    app/
-      main.py              # FastAPI app entry point
-      api/
-        routes.py           # POST /api/validate, POST /api/check
-      core/
-        models.py           # Pydantic data models
-        parser.py           # Sigma YAML → internal model
-        matcher.py          # Evaluation engine
-        validators.py       # Rule validation
-      tests/
-        test_matcher.py     # 22 unit tests
-    static/
-      index.html            # Single-page frontend (vanilla JS)
-    pyproject.toml
-  samples/
-    rules/                  # 3 sample Sigma rules
-    logs/                   # 3 sample log files
-  Dockerfile
-  docker-compose.yml
-  README.md
-```
+22 unit tests covering the matching engine and validator.
 
 ## API Endpoints
 
-### `POST /api/validate`
+| Endpoint | Method | Rate Limit | Description |
+|----------|--------|------------|-------------|
+| `/health` | GET | — | Health check |
+| `/api/validate` | POST | 60/min | Validate a single Sigma rule |
+| `/api/batch-validate` | POST | 30/min | Validate multiple rules (`---` separated) |
+| `/api/check` | POST | 30/min | Match a rule against log events |
+| `/api/batch-check` | POST | 10/min | Match multiple rules against log events |
 
-Validate a Sigma rule YAML.
-
-```bash
-curl -X POST http://localhost:8000/api/validate \
-  -H "Content-Type: application/json" \
-  -d '{"rule_yaml": "title: Test\ndetection:\n  selection:\n    foo|contains: bar\n  condition: selection"}'
-```
-
-### `POST /api/check`
-
-Check a Sigma rule against log events.
+### Example: Check a rule
 
 ```bash
 curl -X POST http://localhost:8000/api/check \
   -H "Content-Type: application/json" \
   -d '{
-    "rule_yaml": "title: Test\nlogsource:\n  product: windows\ndetection:\n  selection:\n    CommandLine|contains:\n      - powershell\n      - -enc\n  condition: selection\nlevel: medium",
-    "logs_text": "{\"CommandLine\": \"powershell -enc AAAA\"}"
+    "rule_yaml": "title: Test\nlogsource:\n  product: windows\ndetection:\n  selection:\n    CommandLine|contains: powershell\n  condition: selection\nlevel: high",
+    "logs_text": "{\"CommandLine\": \"powershell -enc ABC\"}"
   }'
 ```
+
+## Project Structure
+
+```
+SigmaMatch/
+├── backend/
+│   ├── app/
+│   │   ├── main.py              # FastAPI app, CORS, rate limiter, health check
+│   │   ├── api/routes.py        # API endpoints
+│   │   ├── core/
+│   │   │   ├── config.py        # Shared config (limiter, timeouts)
+│   │   │   ├── models.py        # Pydantic data models
+│   │   │   ├── parser.py        # Sigma YAML → SigmaRule parser
+│   │   │   ├── matcher.py       # Rule-vs-event matching engine
+│   │   │   ├── validators.py    # Rule validation
+│   │   │   ├── log_parsers.py   # XML, CSV, Key=Value parsers
+│   │   │   └── log_generator.py # Synthetic log generator for bulk tests
+│   │   └── tests/
+│   │       ├── test_matcher.py  # 22 unit tests
+│   │       └── bulk_test.py     # Bulk test runner (SigmaHQ rules)
+│   ├── static/index.html        # Single-page frontend (vanilla JS)
+│   └── pyproject.toml
+├── samples/                     # Sample rules and log files
+├── Dockerfile
+├── docker-compose.yml
+├── render.yaml                  # Render deployment config
+└── DOCUMENTATION.md             # Full project documentation
+```
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `ALLOWED_ORIGINS` | _(empty)_ | CORS allowed origins (comma-separated) |
+| `MATCH_TIMEOUT` | `30` | Max seconds per match operation |
+| `REDIS_URL` | _(empty)_ | Redis URI for shared rate limiting (e.g. `redis://localhost:6379/0`) |
+
+## Tech Stack
+
+Python 3.11+ · FastAPI · Uvicorn · Pydantic v2 · PyYAML · defusedxml · slowapi + Redis · Docker
+
+## License
+
+MIT
 
 ## Features
 
