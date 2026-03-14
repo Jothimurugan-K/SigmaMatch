@@ -1,6 +1,6 @@
 # SigmaMatch
 
-A minimal web app to upload a Sigma rule (YAML) and a log file (JSON/NDJSON) and check whether the rule matches any events.
+A minimal web app to upload a Sigma rule (YAML) and a log file and check whether the rule matches any events.
 
 ## Quick Start (no venv, no Node.js)
 
