@@ -105,27 +105,4 @@ SigmaMatch/
 ## Tech Stack
 
 Python 3.11+ · FastAPI · Uvicorn · Pydantic v2 · PyYAML · defusedxml · slowapi + Redis · Docker
-
-## Features
-
-- **Modifiers**: `equals`, `contains`, `startswith`, `endswith`, `re` (regex)
-- **Conditions**: `selection`, `sel1 and sel2`, `sel1 or sel2`, `not filter`, `1 of selection_*`, `all of selection_*`, parentheses
-- **Log formats**: JSON (single object or array), NDJSON (one object per line)
-- **File size limit**: 5 MB
-- **Privacy**: All processing in memory, no files persisted
-
-## Security Notes
-
-- Input size limited to 5 MB
-- YAML parsed with `yaml.safe_load` (no code execution)
-- No file persistence — uploads discarded after request
-- CORS not enabled by default (same-origin only)
-- Rate limiting: add middleware (e.g., `slowapi`) for production
-
-## Future (not MVP)
-
-- EVTX/XML log support
-- Advanced modifiers (base64, cidr, numeric comparisons)
-- Correlation rules
-- Field mapping presets (Sysmon, ECS)
 - Multi-backend query preview via sigma-cli
