@@ -106,10 +106,6 @@ SigmaMatch/
 
 Python 3.11+ · FastAPI · Uvicorn · Pydantic v2 · PyYAML · defusedxml · slowapi + Redis · Docker
 
-## License
-
-MIT
-
 ## Features
 
 - **Modifiers**: `equals`, `contains`, `startswith`, `endswith`, `re` (regex)
