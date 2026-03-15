@@ -4,6 +4,11 @@
 
 SigmaMatch is a web-based tool that lets security analysts upload **Sigma detection rules** (YAML) and **log events** (JSON, NDJSON, XML, CSV, Key=Value), then instantly check whether the rules match any events. Get detailed results showing which selections triggered, which fields matched, and why.
 
+## Live Application (Hosted on Render)
+
+You can access the live hosted version here: https://sigmamatch.onrender.com/  
+Currently hosted on Render's free tier, so the application may go down after 15 minutes of inactivity, causing a "cold start" delay (usually 30+ seconds) for the next visitor. Please bear with the delay.
+
 ## Features
 
 - **9 field modifiers** — `equals`, `contains`, `startswith`, `endswith`, `re`, and their negations
@@ -14,11 +19,6 @@ SigmaMatch is a web-based tool that lets security analysts upload **Sigma detect
 - **Built-in samples** — 3 pre-loaded rules with matching logs for quick testing
 - **Safe by design** — `yaml.safe_load`, `defusedxml`, XSS-safe frontend, rate limiting, match timeout
 - **Redis-backed rate limiter** — correct limits across multiple workers/containers (falls back to in-memory for local dev)
-
-## Live Application (Hosted on Render)
-
-You can access the live hosted version here: https://sigmamatch.onrender.com/  
-Currently hosted on Render's free tier, so the application may go down after 15 minutes of inactivity, causing a "cold start" delay (usually 30+ seconds) for the next visitor. Please bear with the delay.
 
 ## Quick Start
 
