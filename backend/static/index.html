@@ -78,7 +78,11 @@ tr:hover td{background:rgba(255,255,255,.02)}
 .privacy-title-docker:hover{color:#bbf7d0}
 .modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:1000;justify-content:center;align-items:center;padding:1rem}
 .modal-overlay.open{display:flex}
-.modal{background:var(--surface);border:1px solid var(--border);border-radius:.75rem;max-width:640px;width:100%;max-height:85vh;overflow-y:auto;padding:1.75rem;position:relative}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:.75rem;max-width:1100px;width:100%;max-height:85vh;overflow-y:auto;padding:1.75rem;position:relative}
+.modal-columns{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
+.modal-columns .modal-col{min-width:0}
+.modal-columns .modal-col+.modal-col{border-left:1px solid var(--border);padding-left:1.5rem}
+@media(max-width:900px){.modal-columns{grid-template-columns:1fr}.modal-columns .modal-col+.modal-col{border-left:none;padding-left:0;border-top:1px solid var(--border);padding-top:1rem}}
 .modal-close{position:absolute;top:.75rem;right:1rem;background:none;border:none;color:var(--muted);font-size:1.4rem;cursor:pointer;padding:.25rem}
 .modal-close:hover{color:var(--text)}
 .modal h2{font-size:1.1rem;font-weight:700;color:var(--text);margin-bottom:.25rem}
@@ -134,49 +138,79 @@ tr:hover td{background:rgba(255,255,255,.02)}
 <div class="modal-overlay" id="dockerModal">
   <div class="modal">
     <button class="modal-close" id="modalClose">&times;</button>
-    <h2>🐳 Self-Host SigmaMatch with Docker</h2>
-    <p class="modal-subtitle">Run this tool entirely inside your own network. Logs never leave your infrastructure.</p>
+    <p style="text-align:center;font-size:.85rem;color:var(--muted);margin-bottom:1rem">Run SigmaMatch on your own infrastructure &mdash; choose Docker or run directly with Python.</p>
 
-    <h3>Prerequisites</h3>
-    <ul>
-      <li><a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener">Docker</a> installed</li>
-      <li><a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git</a> installed</li>
-    </ul>
+    <div class="modal-columns">
+      <!-- Docker column -->
+      <div class="modal-col">
+        <h2>🐳 Self-Host with Docker</h2>
+        <p class="modal-subtitle">Containerized setup. Logs never leave your infrastructure.</p>
 
-    <h3>Step 1 &mdash; Clone the Repository</h3>
-    <div class="code-block" id="codeClone">git clone https://github.com/Jothimurugan-K/SigmaMatch.git
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><a href="https://docs.docker.com/get-docker/" target="_blank" rel="noopener">Docker</a> installed</li>
+          <li><a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git</a> installed</li>
+        </ul>
+
+        <h3>Step 1 &mdash; Clone the Repository</h3>
+        <div class="code-block" id="codeClone">git clone https://github.com/Jothimurugan-K/SigmaMatch.git
 cd SigmaMatch<button class="btn-copy" data-target="codeClone">Copy</button></div>
 
-    <h3>Step 2 &mdash; Build &amp; Run</h3>
-    <div class="code-block" id="codeBuild">docker-compose up -d --build<button class="btn-copy" data-target="codeBuild">Copy</button></div>
-    <p>This builds the image, installs dependencies, and starts the server on port <strong style="color:var(--text)">8000</strong>.</p>
+        <h3>Step 2 &mdash; Build &amp; Run</h3>
+        <div class="code-block" id="codeBuild">docker-compose up -d --build<button class="btn-copy" data-target="codeBuild">Copy</button></div>
+        <p>Builds the image and starts the server on port <strong style="color:var(--text)">8000</strong>.</p>
 
-    <h3>Step 3 &mdash; Open the Tool</h3>
-    <div class="code-block" id="codeOpen">http://localhost:8000<button class="btn-copy" data-target="codeOpen">Copy</button></div>
-    <p>That&rsquo;s it &mdash; the tool is running <strong style="color:#86efac">entirely on your machine</strong>. Now you can safely use real logs.</p>
+        <h3>Step 3 &mdash; Open the Tool</h3>
+        <div class="code-block" id="codeOpen">http://localhost:8000<button class="btn-copy" data-target="codeOpen">Copy</button></div>
+        <p>The tool is running <strong style="color:#86efac">entirely on your machine</strong>.</p>
 
-    <h3>Useful Commands</h3>
-    <table class="env-table">
-      <thead><tr><th>Action</th><th>Command</th></tr></thead>
-      <tbody>
-        <tr><td>View logs</td><td><code>docker-compose logs -f</code></td></tr>
-        <tr><td>Stop</td><td><code>docker-compose down</code></td></tr>
-        <tr><td>Restart</td><td><code>docker-compose restart</code></td></tr>
-      </tbody>
-    </table>
+        <h3>Useful Commands</h3>
+        <table class="env-table">
+          <thead><tr><th>Action</th><th>Command</th></tr></thead>
+          <tbody>
+            <tr><td>View logs</td><td><code>docker-compose logs -f</code></td></tr>
+            <tr><td>Stop</td><td><code>docker-compose down</code></td></tr>
+            <tr><td>Restart</td><td><code>docker-compose restart</code></td></tr>
+          </tbody>
+        </table>
 
-    <h3>Optional Configuration</h3>
-    <p>Add these under <code>environment:</code> in <code>docker-compose.yml</code>:</p>
-    <table class="env-table">
-      <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
-      <tbody>
-        <tr><td>ALLOWED_ORIGINS</td><td><em>same-origin</em></td><td>CORS allowed origins (comma-separated)</td></tr>
-        <tr><td>MATCH_TIMEOUT</td><td>30</td><td>Max seconds per match operation</td></tr>
-      </tbody>
-    </table>
+        <h3>Optional Configuration</h3>
+        <p>Add these under <code>environment:</code> in <code>docker-compose.yml</code>:</p>
+        <table class="env-table">
+          <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+          <tbody>
+            <tr><td>ALLOWED_ORIGINS</td><td><em>same-origin</em></td><td>CORS allowed origins</td></tr>
+            <tr><td>MATCH_TIMEOUT</td><td>30</td><td>Max seconds per match</td></tr>
+          </tbody>
+        </table>
 
-    <h3>Change Port</h3>
-    <p>If port 8000 is taken, edit <code>docker-compose.yml</code> and change <code>"8000:8000"</code> to e.g. <code>"9090:8000"</code>, then access at <code>http://localhost:9090</code>.</p>
+        <h3>Change Port</h3>
+        <p>Edit <code>docker-compose.yml</code> and change <code>"8000:8000"</code> to e.g. <code>"9090:8000"</code>.</p>
+      </div>
+
+      <!-- Local column -->
+      <div class="modal-col">
+        <h2>🖥️ Run Locally (no Docker)</h2>
+        <p class="modal-subtitle">Run directly with Python &mdash; no containers needed.</p>
+
+        <h3>Prerequisites</h3>
+        <ul>
+          <li><a href="https://www.python.org/downloads/" target="_blank" rel="noopener">Python 3.9+</a> installed</li>
+          <li><a href="https://git-scm.com/downloads" target="_blank" rel="noopener">Git</a> installed</li>
+        </ul>
+
+        <h3>Step 1 &mdash; Clone &amp; Navigate</h3>
+        <div class="code-block" id="codeLocalClone">git clone https://github.com/Jothimurugan-K/SigmaMatch.git
+cd SigmaMatch/backend<button class="btn-copy" data-target="codeLocalClone">Copy</button></div>
+
+        <h3>Step 2 &mdash; Install Dependencies</h3>
+        <div class="code-block" id="codeLocalInstall">pip install -e .<button class="btn-copy" data-target="codeLocalInstall">Copy</button></div>
+
+        <h3>Step 3 &mdash; Start the Server</h3>
+        <div class="code-block" id="codeLocalRun">uvicorn app.main:app --reload<button class="btn-copy" data-target="codeLocalRun">Copy</button></div>
+        <p>The server starts on <strong style="color:var(--text)">http://localhost:8000</strong> with live reload enabled.</p>
+      </div>
+    </div>
   </div>
 </div>
 
