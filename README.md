@@ -15,6 +15,11 @@ SigmaMatch is a web-based tool that lets security analysts upload **Sigma detect
 - **Safe by design** — `yaml.safe_load`, `defusedxml`, XSS-safe frontend, rate limiting, match timeout
 - **Redis-backed rate limiter** — correct limits across multiple workers/containers (falls back to in-memory for local dev)
 
+## Live Application (Hosted on Render)
+
+You can access the live hosted version here: https://sigmamatch.onrender.com/  
+Currently hosted on Render's free tier, so the application may go down after 15 minutes of inactivity, causing a "cold start" delay (usually 30+ seconds) for the next visitor. Please bear with the delay.
+
 ## Quick Start
 
 ### Local (no Docker)
